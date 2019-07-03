@@ -5,74 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <title>Trivia</title>
     <style>
         ul {
             /* list-style-type: none; */
         }
 
-        ul li button{
+        button{
             background: none;
-            border: none;
+            border: 1px solid black;
+            padding: 5px;
+            margin: 10px;
+            border-radius: 15px;
         }
 
-        .wrong {
+        .incorrect {
             color: red;
-            /* background-color: red; */
+            border: 1px solid red;
+            border: 1px solid red;
             background: none;
-            border: none;
         }
 
         .correct {
             color: lime;
+            border: 1px solid lime;
             background:none;
-            border: none;
+        }
+        
+        .container {
+            padding-top: 40px;
+            width: 800px;
+            margin: 0 auto;
         }
     </style>
 </head>
 <body>
-    <h1></h1>
-    <p id="q1"></p>
-    <ul>
-        <li><button class="questions" id="a1"></button></li>
-        <li><button class="questions" id="a2"></button></li>
-        <li><button class="questions" id="a3"></button></li>
-        <li><button class="questions" id="a4"></button></li>
-    </ul>
+    <div class="container">
+        <h1></h1>
+        <div class="main">
 
+        </div>
+        </div>
+    </div>
     <script>
+
+        function swap(y, random_list){
+            for(let i = 0; i < random_list.length; i++){
+                let temp = random_list[i];
+                random_list[i] = random_list[y];
+                random_list[y] = temp;
+            }
+            return random_list;
+        }
+
         $(document).ready(function(){
-            $.get('https://opentdb.com/api.php?amount=3&category=26&difficulty=hard&type=multiple', function(data){
+
+            // $.get('https://opentdb.com/api.php?amount=3&category=26&difficulty=hard&type=multiple', function(data){
+            $.get('https://opentdb.com/api.php?amount=10&category=18&type=multiple', function(data){
                 console.log(data);
+
+                // Create a category
                 var cat = data.results[0].category;
-                var question = data.results[0].question;
-                var correct = data.results[0].correct_answer;
-                var incorrect = data.results[0].incorrect_answers;
-
                 $("h1").html(cat);
-                $("#q1").html(question);
-                $("#a1").html(incorrect[0]);
-                $("#a2").html(correct);
-                $("#a3").html(incorrect[1]);
-                $("#a4").html(incorrect[2]);
 
+                for(var i = 0; i < 5; i++){
+                    var question = data.results[i].question;
+                    var correct = data.results[i].correct_answer;
+                    var incorrect = data.results[i].incorrect_answers;
+                    var question = data.results[i].question;
 
-                $("#a2").attr('value', correct);
-        
+                    // Generate questions
+                    $(".main").append("<p class='questions"+ i +"'></p>");
+                    $(".questions" + i).html(question);
+
+                    // Create a new list of all answers
+                    var answer_list = [];
+
+                    for(let i = 0; i < incorrect.length; i++){
+                        answer_list.push(incorrect[i]);
+                    }
+                    answer_list.push(correct);
+
+                    console.log("answer_list: " , answer_list);
+
+                    // Create a random number generator for the number of answers given
+                    var rand = Math.floor(Math.random()*(answer_list.length));
+                    // console.log("Random Number: ", rand);
+
+                    //use swap function to randomize list
+
+                    var swapped = swap(rand, answer_list);
+                    console.log(swapped);
+                    
+                    for(let j = 0; j < answer_list.length; j++){
+                        $(".main").append("<button class='questions' correct_ans='" + correct + "' value='" + swapped[j] + "' id='question" + j + "'>" + swapped[j] + "</button>");
+                    }
+                    // $("body").append('<input type="checkbox" name="vehicle1" value="Bike">item1');
+                }
 
                 $(".questions").click(function(){
-                    if(this.value === correct){
-                        console.log("You win!");
-                        $(this).attr('class', 'correct');
+                    // console.log($(this).attr('correct_ans'));
+                    // console.log($(this).val());
+                    if($(this).val() === $(this).attr('correct_ans')){
+                        $(this).addClass('correct');
                     } else {
-                        console.log(this.value);
-                        $(this).attr('class', 'wrong');
+                        $(this).addClass('incorrect');
                     }
-                    console.log(this);
-                    console.log(this.value);
-
-                    console.log("We pressed our button");
-                    //hacker stuff
                 })
             })
         })
